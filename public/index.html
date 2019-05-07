@@ -19,6 +19,10 @@
                     submitMessage: $('#submitMessage').val()
                 };
 
+                $('#username').prop('readonly', true);
+                $('#searchQuery').val('');
+                $('#submitMessage').val('');
+
                 socket.emit('form submitted', submissions);
 
                 return false;
