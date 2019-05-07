@@ -2,41 +2,59 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Socket.IO Chat</title>
-    <style>
-        * { margin: 0; padding: 0; box-sizing: border-box; }
-        body { font: 13px Helvetica, Arial; }
-        form { background: #000; padding: 3px; position: fixed; bottom: 0; width: 100%; }
-        form input { border: 0; padding: 10px; width: 90%; margin-right: .5%; }
-        form button { width: 9%; background: rgb(130, 224, 255); border: none; padding: 10px; }
-        #messages { list-style-type: none; margin: 0; padding: 0; }
-        #messages li { padding: 5px 10px; }
-        #messages li:nth-child(odd) { background: #eee; }
-    </style>
+    <title>Pixabay Searching</title>
     <script src="/socket.io/socket.io.js"></script>
-    <script src="https://code.jquery.com/jquery-1.11.1.js"></script>
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js" integrity="sha384-UO2eT0CpHqdSJQ6hJty5KVphtPhzWj9WO1clHTMGa3JDZwrnQq4sF86dIHNDz0W1" crossorigin="anonymous"></script>
+    <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js" integrity="sha384-JjSmVgyd0p3pXB1rRibZUAYoIIy6OrQ6VrjIEaFf/nJGzIxFDsf4x0xIM+B07jRM" crossorigin="anonymous"></script>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css" integrity="sha384-ggOyR0iXCbMQv3Xipma34MD+dH/1fQ784/j6cY/iJTQUOhcWr7x9JvoRxT2MZw1T" crossorigin="anonymous">
     <script>
         $(function() {
-            var socket = io();
-            $('form').submit(function(e) {
+            let socket = io('http://localhost:3000/');
+            $('#pixabayRequest').submit(function(e) {
                 e.preventDefault();
-                socket.emit('chat message', $('#m').val());
-                $('#m').val('');
+                let submissions = {
+                    username: $('#username').val(),
+                    searchQuery: $('#searchQuery').val(),
+                    submitMessage: $('#submitMessage').val()
+                };
+
+                socket.emit('form submitted', submissions);
+
                 return false;
             });
-            socket.on('new presence', function(msg) {
-                $('#messages').append($('<li>').text(msg));
+
+            socket.on('response message', function(msg) {
+                // console.log(msg['hits']);
+                $('#requested').append($('<h1>').text('Username: ' + msg['username']), $('<h2>').text('Message: ' + msg['message']));
+                for (let h in msg['results']['hits']) {
+                    let imgUrl = msg['results']['hits'][h]['previewURL'];
+                    let altText = msg['results']['hits'][h]['tags'];
+                    $('#requested').append($(`<img src=${imgUrl} alt=${altText}>`))
+                }
             });
-            socket.on('chat message', function(msg) {
-                $('#messages').append($('<li>').text(msg));
-            });
-        });
+
+        })
     </script>
 </head>
 <body>
-    <ul id="messages"></ul>
-    <form action="">
-        <input id="m" autocomplete="off" /><button>Send</button>
+    <form action="" method="get" id="pixabayRequest">
+        <label for="username">
+            <input type="text" id=username placeholder="Username" autocomplete="off"/>
+        </label>
+        <label for="searchQuery">
+            <input type="text" id="searchQuery" placeholder="Query..." autocomplete="off"/>
+        </label>
+        <label for="submitMessage">
+            <input type="text" id="submitMessage" placeholder="Message" autocomplete="off"/>
+        </label>
+        <button type="submit">Search</button>
     </form>
+    <div class="container">
+        <div class="row">
+            <div class="col" id="requested">
+            </div>
+        </div>
+    </div>
 </body>
 </html>
