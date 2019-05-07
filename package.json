@@ -4,7 +4,7 @@
   "description": "Assignment 7 for CS-554",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js",
+    "start": "concurrently \"node server.js\" \"node worker/worker.js\"",
     "test": "echo \"Error: no test specified\" && exit 1"
   },
   "repository": {
@@ -21,6 +21,7 @@
     "axios": "^0.18.0",
     "bluebird": "^3.5.4",
     "body-parser": "^1.19.0",
+    "concurrently": "^4.1.0",
     "express": "^4.16.4",
     "http": "0.0.0",
     "node-redis-pubsub": "^4.0.0",
